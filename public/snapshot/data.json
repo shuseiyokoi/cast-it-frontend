@@ -1,0 +1,80 @@
+{
+  "exported_at": "2026-07-08T17:39:40.179Z",
+  "episodes": {
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
+        "title": "test01",
+        "language": "en",
+        "publish_date": null,
+        "status": "completed",
+        "duration_seconds": 124,
+        "created_at": "2026-07-01T16:02:33.354110-07:00",
+        "updated_at": "2026-07-02T16:39:28.139288-07:00"
+      }
+    ]
+  },
+  "audioAssets": {
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": "0bb092a5-cc17-4163-a567-d809aaf9f6f4",
+        "episode": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
+        "episode_title": "test01",
+        "script_segment": null,
+        "provider": "ffmpeg",
+        "voice": "",
+        "duration": 124,
+        "format": "mp3",
+        "is_final_episode_audio": true,
+        "status": "ready",
+        "generated_at": "2026-07-01T17:30:05.216657-07:00",
+        "created_at": "2026-07-01T17:30:05.216920-07:00",
+        "updated_at": "2026-07-01T17:30:05.216927-07:00"
+      }
+    ]
+  },
+  "assetDetails": {
+    "0bb092a5-cc17-4163-a567-d809aaf9f6f4": {
+      "id": "0bb092a5-cc17-4163-a567-d809aaf9f6f4",
+      "episode": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
+      "episode_title": "test01",
+      "script_segment": null,
+      "provider": "ffmpeg",
+      "voice": "",
+      "file_path": "audio/aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e/episode_final.mp3",
+      "duration": 124,
+      "sample_rate": 44100,
+      "bitrate": 192,
+      "format": "mp3",
+      "generation_time": null,
+      "generated_at": "2026-07-01T17:30:05.216657-07:00",
+      "file_size": 2980510,
+      "checksum": "cb9a794eb4ead8cd7fbcaa75ff9d1dce41d3285bf6d2543bdd74050610839185",
+      "is_final_episode_audio": true,
+      "status": "ready",
+      "created_at": "2026-07-01T17:30:05.216920-07:00",
+      "updated_at": "2026-07-01T17:30:05.216927-07:00"
+    }
+  },
+  "episodeDetails": {
+    "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e": {
+      "id": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
+      "title": "test01",
+      "description": "",
+      "summary": "Exploring recent advancements in AI models, particularly Devin Fusion's multi-model approach to reduce costs while maintaining performance, and the emergence of DeepSeek DSpark.",
+      "language": "en",
+      "publish_date": null,
+      "status": "completed",
+      "duration_seconds": 124,
+      "cover_image": "",
+      "created_at": "2026-07-01T16:02:33.354110-07:00",
+      "updated_at": "2026-07-02T16:39:28.139288-07:00"
+    }
+  }
+}

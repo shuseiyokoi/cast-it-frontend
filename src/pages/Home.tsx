@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { api, useApi } from '../lib/api'
+import { api, mediaUrl, useApi } from '../lib/api'
 import type { AudioAsset, Episode, EpisodeDetail, Paginated } from '../lib/types'
 import { formatDate, formatDuration, titleCase } from '../lib/format'
 import { getPosition, track } from '../lib/activity'
@@ -45,7 +45,7 @@ function useFeed() {
       if (cancelled) return
       const next: Record<string, string> = {}
       for (const [episodeId, filePath] of pairs) {
-        if (filePath) next[episodeId] = `/media/${filePath}`
+        if (filePath) next[episodeId] = mediaUrl(filePath)
       }
       setUrls(next)
     })
