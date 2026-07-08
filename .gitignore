@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# local static-snapshot exports (npm run snapshot)
+public/snapshot/

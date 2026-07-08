@@ -3,12 +3,20 @@ import type { AudioAsset, Episode, EpisodeDetail, Paginated } from './types'
 
 export const API_BASE = '/api/v1'
 
+// Supabase mode: episodes and activity go straight to the Supabase project
+// (the anon key is public by design; row-level security guards the data).
+// Takes precedence over the other modes when configured.
+export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, '')
+export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
+export const SUPABASE_MODE = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY)
+
 // Static-snapshot mode: instead of a live backend, answer API calls from a
-// snapshot bundled at build time (see scripts/export-snapshot.mjs). Used for
-// the GitHub Pages deployment.
-export const STATIC_MODE = import.meta.env.VITE_STATIC_SNAPSHOT === 'true'
+// snapshot bundled at build time (see scripts/export-snapshot.mjs).
+export const STATIC_MODE =
+  !SUPABASE_MODE && import.meta.env.VITE_STATIC_SNAPSHOT === 'true'
 
 export function mediaUrl(filePath: string): string {
+  if (filePath.startsWith('http')) return filePath
   return STATIC_MODE
     ? `${import.meta.env.BASE_URL}snapshot/media/${filePath}`
     : `/media/${filePath}`
@@ -50,7 +58,96 @@ async function staticApi<T>(path: string): Promise<T> {
   throw new ApiError(404, `No snapshot data for ${path}`)
 }
 
+// Rows in the Supabase `episodes` table (see the backend's supabase/migrations).
+interface SupabaseEpisodeRow {
+  id: string
+  title: string
+  description: string
+  summary: string
+  language: string
+  publish_date: string | null
+  duration_seconds: number | null
+  audio_url: string
+  cover_url: string | null
+  category: string
+  created_at: string
+  updated_at: string
+}
+
+let supabaseRowsPromise: Promise<SupabaseEpisodeRow[]> | null = null
+
+function loadSupabaseRows(force = false): Promise<SupabaseEpisodeRow[]> {
+  if (force) supabaseRowsPromise = null
+  supabaseRowsPromise ??= fetch(
+    `${SUPABASE_URL}/rest/v1/episodes?select=*&order=publish_date.desc.nullslast,created_at.desc`,
+    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
+  ).then((res) => {
+    if (!res.ok) {
+      supabaseRowsPromise = null
+      throw new ApiError(res.status, 'Could not load episodes')
+    }
+    return res.json()
+  })
+  return supabaseRowsPromise
+}
+
+function toEpisode(row: SupabaseEpisodeRow): Episode {
+  return {
+    id: row.id,
+    title: row.title,
+    language: row.language,
+    publish_date: row.publish_date,
+    status: 'completed',
+    duration_seconds: row.duration_seconds,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
+}
+
+// Answers the same paths the Django API serves, so the UI needs no changes.
+// Every published row has final audio; its "asset detail" is the audio URL.
+async function supabaseApi<T>(path: string): Promise<T> {
+  if (path.startsWith('/episodes/?')) {
+    const rows = await loadSupabaseRows(true)
+    const results = rows.map(toEpisode)
+    return { count: results.length, next: null, previous: null, results } as T
+  }
+  if (path.startsWith('/audio-assets/?')) {
+    const rows = await loadSupabaseRows()
+    const results = rows.map((row) => ({
+      id: row.id,
+      episode: row.id,
+      is_final_episode_audio: true,
+      status: 'ready',
+      generated_at: row.updated_at,
+    })) as AudioAsset[]
+    return { count: results.length, next: null, previous: null, results } as T
+  }
+  const episode = path.match(/^\/episodes\/([^/]+)\/$/)
+  const asset = path.match(/^\/audio-assets\/([^/]+)\/$/)
+  const id = episode?.[1] ?? asset?.[1]
+  if (id) {
+    const rows = await loadSupabaseRows()
+    const row = rows.find((r) => r.id === id)
+    if (!row) throw new ApiError(404, `Episode ${id} not found`)
+    if (asset) return { file_path: row.audio_url } as T
+    return {
+      ...toEpisode(row),
+      description: row.description,
+      summary: row.summary,
+      cover_image: row.cover_url,
+    } as T
+  }
+  throw new ApiError(404, `No Supabase data for ${path}`)
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  if (SUPABASE_MODE) {
+    if (init?.method && init.method !== 'GET') {
+      throw new ApiError(405, 'Read-only in Supabase mode')
+    }
+    return supabaseApi<T>(path)
+  }
   if (STATIC_MODE) {
     if (init?.method && init.method !== 'GET') {
       throw new ApiError(405, 'Read-only in static mode')

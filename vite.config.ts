@@ -7,7 +7,10 @@ const backend = process.env.CAST_IT_API_URL ?? 'http://localhost:8000'
 
 export default defineConfig({
   // GitHub Pages serves the site from /<repo>/, not the domain root.
-  base: process.env.VITE_STATIC_SNAPSHOT === 'true' ? '/cast-it-frontend/' : '/',
+  base:
+    process.env.GHPAGES === 'true' || process.env.VITE_STATIC_SNAPSHOT === 'true'
+      ? '/cast-it-frontend/'
+      : '/',
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
