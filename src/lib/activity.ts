@@ -21,21 +21,11 @@ export interface ActivityEvent {
 }
 
 const QUEUE_KEY = 'castit.activity.queue'
-const SESSION_KEY = 'castit.session'
 const MAX_QUEUE = 500
 
 const ENDPOINT: string | undefined = import.meta.env.VITE_ACTIVITY_ENDPOINT
 
-import { SUPABASE_ANON_KEY, SUPABASE_MODE, SUPABASE_URL } from './api'
-
-function sessionId(): string {
-  let id = sessionStorage.getItem(SESSION_KEY)
-  if (!id) {
-    id = crypto.randomUUID()
-    sessionStorage.setItem(SESSION_KEY, id)
-  }
-  return id
-}
+import { SUPABASE_MODE, sessionId, supabase } from './supabase'
 
 function readQueue(): ActivityEvent[] {
   try {
@@ -57,28 +47,24 @@ async function flush() {
   if (queue.length === 0) return
   flushing = true
   try {
-    let res: Response
     if (SUPABASE_MODE) {
+      const { data } = await supabase!.auth.getSession()
+      const userId = data.session?.user.id ?? null
       // The activity_events table has no episode_title column.
-      const rows = queue.map(({ episode_title: _title, ...row }) => row)
-      res = await fetch(`${SUPABASE_URL}/rest/v1/activity_events`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify(rows),
-      })
+      const rows = queue.map(({ episode_title: _title, ...row }) => ({
+        ...row,
+        user_id: userId,
+      }))
+      const { error } = await supabase!.from('activity_events').insert(rows)
+      if (!error) writeQueue([])
     } else {
-      res = await fetch(ENDPOINT!, {
+      const res = await fetch(ENDPOINT!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ events: queue }),
       })
+      if (res.ok) writeQueue([])
     }
-    if (res.ok) writeQueue([])
   } catch {
     /* stay queued for the next flush */
   } finally {

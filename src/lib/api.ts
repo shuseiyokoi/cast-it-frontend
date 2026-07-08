@@ -1,14 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AudioAsset, Episode, EpisodeDetail, Paginated } from './types'
 
-export const API_BASE = '/api/v1'
+import { SUPABASE_MODE, sessionId, supabase } from './supabase'
 
-// Supabase mode: episodes and activity go straight to the Supabase project
-// (the anon key is public by design; row-level security guards the data).
-// Takes precedence over the other modes when configured.
-export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/$/, '')
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
-export const SUPABASE_MODE = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY)
+export const API_BASE = '/api/v1'
 
 // Static-snapshot mode: instead of a live backend, answer API calls from a
 // snapshot bundled at build time (see scripts/export-snapshot.mjs).
@@ -76,17 +71,21 @@ interface SupabaseEpisodeRow {
 
 let supabaseRowsPromise: Promise<SupabaseEpisodeRow[]> | null = null
 
+// The feed comes from personal_feed(): episodes ranked by how much the
+// caller has listened to each category (logged-in user or anonymous session).
+async function fetchSupabaseRows(): Promise<SupabaseEpisodeRow[]> {
+  const { data, error } = await supabase!.rpc('personal_feed', {
+    p_session_id: sessionId(),
+  })
+  if (error) throw new ApiError(500, error.message)
+  return (data ?? []) as SupabaseEpisodeRow[]
+}
+
 function loadSupabaseRows(force = false): Promise<SupabaseEpisodeRow[]> {
   if (force) supabaseRowsPromise = null
-  supabaseRowsPromise ??= fetch(
-    `${SUPABASE_URL}/rest/v1/episodes?select=*&order=publish_date.desc.nullslast,created_at.desc`,
-    { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } },
-  ).then((res) => {
-    if (!res.ok) {
-      supabaseRowsPromise = null
-      throw new ApiError(res.status, 'Could not load episodes')
-    }
-    return res.json()
+  supabaseRowsPromise ??= fetchSupabaseRows().catch((error: unknown) => {
+    supabaseRowsPromise = null
+    throw error
   })
   return supabaseRowsPromise
 }

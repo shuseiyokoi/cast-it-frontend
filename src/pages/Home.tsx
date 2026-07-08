@@ -3,6 +3,7 @@ import { api, mediaUrl, useApi } from '../lib/api'
 import type { AudioAsset, Episode, EpisodeDetail, Paginated } from '../lib/types'
 import { formatDate, formatDuration, titleCase } from '../lib/format'
 import { getPosition, track } from '../lib/activity'
+import { useAuth } from '../auth/AuthContext'
 import { usePlayer, type PlayableEpisode } from '../player/PlayerContext'
 import Cover from '../components/Cover'
 import { ClockIcon, PauseIcon, PlayIcon, SparkleIcon } from '../components/icons'
@@ -13,7 +14,12 @@ interface FeedEpisode extends Episode {
 }
 
 function useFeed() {
-  const episodes = useApi<Paginated<Episode>>('/episodes/?page_size=50', 60000)
+  // The user id in the path makes the feed refetch (and re-rank) on login/logout.
+  const { user } = useAuth()
+  const episodes = useApi<Paginated<Episode>>(
+    `/episodes/?page_size=50&u=${user?.id ?? ''}`,
+    60000,
+  )
   const finals = useApi<Paginated<AudioAsset>>(
     '/audio-assets/?is_final_episode_audio=true&status=ready&page_size=100',
     60000,
