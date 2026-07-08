@@ -26,6 +26,8 @@ const MAX_QUEUE = 500
 
 const ENDPOINT: string | undefined = import.meta.env.VITE_ACTIVITY_ENDPOINT
 
+import { SUPABASE_ANON_KEY, SUPABASE_MODE, SUPABASE_URL } from './api'
+
 function sessionId(): string {
   let id = sessionStorage.getItem(SESSION_KEY)
   if (!id) {
@@ -50,16 +52,32 @@ function writeQueue(queue: ActivityEvent[]) {
 let flushing = false
 
 async function flush() {
-  if (!ENDPOINT || flushing) return
+  if ((!SUPABASE_MODE && !ENDPOINT) || flushing) return
   const queue = readQueue()
   if (queue.length === 0) return
   flushing = true
   try {
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ events: queue }),
-    })
+    let res: Response
+    if (SUPABASE_MODE) {
+      // The activity_events table has no episode_title column.
+      const rows = queue.map(({ episode_title: _title, ...row }) => row)
+      res = await fetch(`${SUPABASE_URL}/rest/v1/activity_events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(rows),
+      })
+    } else {
+      res = await fetch(ENDPOINT!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ events: queue }),
+      })
+    }
     if (res.ok) writeQueue([])
   } catch {
     /* stay queued for the next flush */

@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "snapshot": "node scripts/export-snapshot.mjs",
-    "build:pages": "tsc -b && VITE_STATIC_SNAPSHOT=true vite build",
-    "preview:pages": "VITE_STATIC_SNAPSHOT=true vite preview",
+    "build:pages": "tsc -b && GHPAGES=true vite build",
+    "preview:pages": "GHPAGES=true vite preview",
+    "build:snapshot": "tsc -b && VITE_STATIC_SNAPSHOT=true vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
