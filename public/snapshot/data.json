@@ -7,7 +7,7 @@
     "results": [
       {
         "id": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
-        "title": "test01",
+        "title": "Devin Fusion vs. DeepSeek DSpark",
         "language": "en",
         "publish_date": null,
         "status": "completed",
@@ -25,7 +25,7 @@
       {
         "id": "0bb092a5-cc17-4163-a567-d809aaf9f6f4",
         "episode": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
-        "episode_title": "test01",
+        "episode_title": "Devin Fusion vs. DeepSeek DSpark",
         "script_segment": null,
         "provider": "ffmpeg",
         "voice": "",
@@ -43,7 +43,7 @@
     "0bb092a5-cc17-4163-a567-d809aaf9f6f4": {
       "id": "0bb092a5-cc17-4163-a567-d809aaf9f6f4",
       "episode": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
-      "episode_title": "test01",
+      "episode_title": "Devin Fusion vs. DeepSeek DSpark",
       "script_segment": null,
       "provider": "ffmpeg",
       "voice": "",
@@ -65,7 +65,7 @@
   "episodeDetails": {
     "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e": {
       "id": "aa39ee7c-ce9c-467c-b8f6-10a127ad7d4e",
-      "title": "test01",
+      "title": "Devin Fusion vs. DeepSeek DSpark",
       "description": "",
       "summary": "Exploring recent advancements in AI models, particularly Devin Fusion's multi-model approach to reduce costs while maintaining performance, and the emergence of DeepSeek DSpark.",
       "language": "en",
