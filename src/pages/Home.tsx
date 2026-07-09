@@ -4,6 +4,7 @@ import type { AudioAsset, Episode, EpisodeDetail, Paginated } from '../lib/types
 import { formatDate, formatDuration, titleCase } from '../lib/format'
 import { getPosition, track } from '../lib/activity'
 import { useAuth } from '../auth/AuthContext'
+import InterestPicker from '../auth/InterestPicker'
 import { usePlayer, type PlayableEpisode } from '../player/PlayerContext'
 import Cover from '../components/Cover'
 import { ClockIcon, PauseIcon, PlayIcon, SparkleIcon } from '../components/icons'
@@ -173,6 +174,7 @@ export default function Home() {
 
   return (
     <div>
+      <InterestPicker onSaved={refresh} />
       {loading && <Spinner label="Loading your episodes…" />}
       {error && <ErrorState message={error} onRetry={refresh} />}
 
