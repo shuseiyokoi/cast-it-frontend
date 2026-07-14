@@ -1,6 +1,6 @@
 # Cast It — Frontend
 
-Listener app for the [Cast It](../cast-it-podcast-builder) AI podcast platform. Episodes are generated locally by the backend and published to Supabase; this frontend lists them, plays them, collects listening activity, and personalizes the feed per listener. Built with React 19, TypeScript, Vite, Tailwind CSS 4, and Supabase (data + auth).
+Listener app for the [Cast It](https://shuseiyokoi.github.io/cast-it-frontend/)) AI podcast platform. Episodes are generated locally by the backend and published to Supabase; this frontend lists them, plays them, collects listening activity, and personalizes the feed per listener. Built with React 19, TypeScript, Vite, Tailwind CSS 4, and Supabase (data + auth).
 
 ## Features
 
