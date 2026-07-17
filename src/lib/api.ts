@@ -65,6 +65,7 @@ interface SupabaseEpisodeRow {
   audio_url: string
   cover_url: string | null
   category: string
+  publish: number
   created_at: string
   updated_at: string
 }
@@ -78,7 +79,9 @@ async function fetchSupabaseRows(): Promise<SupabaseEpisodeRow[]> {
     p_session_id: sessionId(),
   })
   if (error) throw new ApiError(500, error.message)
-  return (data ?? []) as SupabaseEpisodeRow[]
+  // Server-side filtering is authoritative (RLS + personal_feed); this guard
+  // just keeps unpublished rows out if the backend ever regresses.
+  return ((data ?? []) as SupabaseEpisodeRow[]).filter((row) => row.publish === 1)
 }
 
 function loadSupabaseRows(force = false): Promise<SupabaseEpisodeRow[]> {
