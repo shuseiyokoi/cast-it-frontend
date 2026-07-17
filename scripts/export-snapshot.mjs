@@ -44,9 +44,16 @@ const [episodePage, assetPage] = await Promise.all([
   api('/audio-assets/?is_final_episode_audio=true&status=ready&page_size=100'),
 ])
 
+// The publish flag (0/1) gates listener visibility; unpublished episodes are
+// left out of the snapshot entirely, audio included.
+const publishedIds = new Set(
+  episodePage.results.filter((ep) => ep.publish === 1).map((ep) => ep.id),
+)
+
 // Newest ready final asset per episode (mirrors the app's own selection).
 const newestPerEpisode = new Map()
 for (const asset of assetPage.results) {
+  if (!publishedIds.has(asset.episode)) continue
   const prev = newestPerEpisode.get(asset.episode)
   if (!prev || (asset.generated_at ?? '') > (prev.generated_at ?? '')) {
     newestPerEpisode.set(asset.episode, asset)
