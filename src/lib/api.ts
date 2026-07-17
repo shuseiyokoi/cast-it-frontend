@@ -133,14 +133,29 @@ async function supabaseApi<T>(path: string): Promise<T> {
     const row = rows.find((r) => r.id === id)
     if (!row) throw new ApiError(404, `Episode ${id} not found`)
     if (asset) return { file_path: row.audio_url } as T
+    const keywords = await fetchEpisodeKeywords(id)
     return {
       ...toEpisode(row),
       description: row.description,
       summary: row.summary,
       cover_image: row.cover_url,
+      keywords,
     } as T
   }
   throw new ApiError(404, `No Supabase data for ${path}`)
+}
+
+async function fetchEpisodeKeywords(episodeId: string): Promise<string[]> {
+  const { data, error } = await supabase!
+    .from('episode_tags')
+    .select('tag_slug, tags(name)')
+    .eq('episode_id', episodeId)
+  if (error || !data) return []
+  return data.map((row) => {
+    const tag = row.tags as { name: string } | { name: string }[] | null
+    const name = Array.isArray(tag) ? tag[0]?.name : tag?.name
+    return name || (row.tag_slug as string)
+  })
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {

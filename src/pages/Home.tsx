@@ -158,8 +158,31 @@ function EpisodeRow({ episode }: { episode: FeedEpisode }) {
         </button>
       </div>
       {expanded && (
-        <div className="border-t border-zinc-800/80 px-4 py-3 text-sm leading-relaxed text-zinc-400">
-          {detail ? (detail.summary || detail.description || 'No description available.') : 'Loading…'}
+        <div className="space-y-3 border-t border-zinc-800/80 px-4 py-3">
+          {!detail ? (
+            <p className="text-sm text-zinc-500">Loading…</p>
+          ) : (
+            <>
+              <h3 className="text-sm font-semibold leading-snug text-zinc-100 sm:text-base">
+                {detail.title || episode.title}
+              </h3>
+              {(detail.keywords?.length ?? 0) > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {detail.keywords!.map((kw) => (
+                    <span
+                      key={kw}
+                      className="rounded-full border border-zinc-700 px-2.5 py-0.5 text-[11px] text-zinc-300"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <p className="text-sm leading-relaxed text-zinc-400">
+                {detail.description || detail.summary || 'No description available.'}
+              </p>
+            </>
+          )}
         </div>
       )}
     </li>

@@ -20,6 +20,8 @@ export interface EpisodeDetail extends Episode {
   description: string
   summary: string
   cover_image: string | null
+  /** Display names from episode_tags (Supabase) or empty in other modes. */
+  keywords?: string[]
 }
 
 export interface Article {
