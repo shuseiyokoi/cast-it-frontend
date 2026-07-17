@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from './AuthContext'
 
-export default function AuthBar() {
+interface AuthBarProps {
+  onOpenAccount?: () => void
+  accountActive?: boolean
+}
+
+export default function AuthBar({ onOpenAccount, accountActive }: AuthBarProps) {
   const auth = useAuth()
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
@@ -15,7 +20,18 @@ export default function AuthBar() {
   if (auth.user) {
     return (
       <div className="flex items-center gap-2">
-        <span className="max-w-32 truncate text-xs text-zinc-400">{auth.user.email}</span>
+        <button
+          type="button"
+          onClick={onOpenAccount}
+          title="Account info"
+          className={`max-w-32 truncate rounded-lg px-2 py-1.5 text-xs transition-colors ${
+            accountActive
+              ? 'bg-zinc-800 text-zinc-100'
+              : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
+          }`}
+        >
+          {auth.user.email}
+        </button>
         <button
           onClick={() => void auth.signOut()}
           className="rounded-lg border border-zinc-700 px-2.5 py-1.5 text-xs text-zinc-300 transition-colors hover:border-zinc-500"
